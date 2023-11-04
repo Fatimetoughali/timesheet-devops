@@ -4,19 +4,29 @@ services:
   mysqldb:
     image: mysql:5.7
     restart: unless-stopped
-    ports:
-      - 3307:3306
     environment:
-      - MYSQL_ALLOW_EMPTY_PASSWORD=yes
+      - MYSQL_ROOT_PASSWOED=
+      - MYSQL_DATABASE=timesheet
+    ports:
+      - 3306:3306
     volumes:
       - db:/var/lib/mysql
   timesheet-backend:
     depends_on:
       - mysqldb
     build: ./
+    image: fatimetou14/timesheet-devops:1.0.0
     restart: on-failure
     ports:
-      - 6868:8082
+      - 8082:8082
+    environment:
+      SPRING_APPLICATION_JSON: '{
+      "spring.datasource.url" : "jdbc:mysql://localhost:3306/timesheet?createDatabaseIfNotExist=true",
+      "spring.datasource.username" : "root",
+      "spring.datasource.password" : null,
+      "spring.jpa.properties.hibernate.dialect" : "org.hibernate.dialect.MySQL5InnoDBDialect",
+      "spring.jpa.hibernate.ddl-auto" : "update"
+    }'
     stdin_open: true
     tty: true
 volumes:
